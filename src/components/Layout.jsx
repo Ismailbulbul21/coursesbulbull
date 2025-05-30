@@ -19,8 +19,9 @@ export default function Layout({ children }) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
-              <BookOpen className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-bold text-gray-900">CourseHub</span>
+              <img src="/bulbul-logo.svg" alt="BulbulAqoon" className="h-8 w-8" />
+              <span className="text-xl font-bold text-gray-900">BulbulAqoon</span>
+        
             </Link>
 
             {/* Navigation Links */}
@@ -106,7 +107,7 @@ export default function Layout({ children }) {
       <footer className="bg-white border-t border-gray-200 mt-16">
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <div className="text-center text-gray-600">
-            <p>&copy; 2024 CourseHub. All rights reserved.</p>
+            <p>&copy; 2024 BulbulAqoon - Somali Knowledge Platform. All rights reserved.</p>
           </div>
         </div>
       </footer>
