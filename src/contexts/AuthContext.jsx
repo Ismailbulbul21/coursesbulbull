@@ -92,6 +92,19 @@ export const AuthProvider = ({ children }) => {
       
       if (error) {
         console.error('Supabase sign out error:', error)
+        
+        // If it's a network error, clear local session anyway
+        if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_INTERNET_DISCONNECTED')) {
+          console.log('Network error detected, clearing local session...')
+          // Force clear local session
+          setUser(null)
+          setIsAdmin(false)
+          // Clear any stored session data
+          localStorage.removeItem('supabase.auth.token')
+          sessionStorage.clear()
+          return { error: null }
+        }
+        
         return { error }
       }
       
@@ -99,6 +112,17 @@ export const AuthProvider = ({ children }) => {
       return { error: null }
     } catch (err) {
       console.error('Sign out exception:', err)
+      
+      // If it's a network error, clear local session anyway
+      if (err.message?.includes('Failed to fetch') || err.message?.includes('ERR_INTERNET_DISCONNECTED')) {
+        console.log('Network exception detected, clearing local session...')
+        setUser(null)
+        setIsAdmin(false)
+        localStorage.removeItem('supabase.auth.token')
+        sessionStorage.clear()
+        return { error: null }
+      }
+      
       return { error: err }
     }
   }
