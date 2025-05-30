@@ -9,9 +9,18 @@ export default function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleSignOut = async () => {
-    await signOut()
-    navigate('/')
-    setIsMobileMenuOpen(false)
+    try {
+      const { error } = await signOut()
+      if (error) {
+        console.error('Sign out error:', error)
+        return
+      }
+      // Only navigate and close menu if sign out was successful
+      navigate('/')
+      setIsMobileMenuOpen(false)
+    } catch (err) {
+      console.error('Sign out failed:', err)
+    }
   }
 
   const closeMobileMenu = () => {
