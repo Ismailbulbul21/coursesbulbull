@@ -269,24 +269,24 @@ export default function Purchase() {
               <div className="card p-6 mb-6">
                 <div className="flex items-center mb-4">
                   <CreditCard className="h-5 w-5 text-primary-600 mr-2" />
-                  <h3 className="text-xl font-semibold text-gray-900">Payment Instructions</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">LACAG BIXINTA </h3>
                 </div>
                 
                 <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-4">
                   <h4 className="font-semibold text-primary-900 mb-2">Mobile Money Payment</h4>
                   <p className="text-primary-800 mb-3">
-                    Send exactly <strong>${course.price}</strong> to the following number:
+                    Lacagta numberkaan  exactly <strong>${course.price}</strong> numberkaan ku soo dir :
                   </p>
                   <div className="flex items-center justify-center bg-white rounded-lg p-4 border border-primary-300">
                     <Phone className="h-5 w-5 text-primary-600 mr-2" />
-                    <span className="text-xl font-bold text-primary-900">+252 61 234 5678</span>
+                    <span className="text-xl font-bold text-primary-900">+252 61 7211084</span>
                   </div>
                 </div>
 
                 <div className="space-y-3 text-sm text-gray-600">
                   <div className="flex items-start">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Send the exact amount: <strong>${course.price}</strong></span>
+                    <span>Qiimha lacagta waa kan : <strong>${course.price}</strong></span>
                   </div>
                   <div className="flex items-start">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
@@ -307,6 +307,7 @@ export default function Purchase() {
                 </div>
                 
                 <p className="text-gray-600 mb-6">
+                  Markaad lacagta soo dirto , Soo qor  numberka aad ka soo dirtay  hoos ku soo qor.
                   After sending the payment, enter your phone number below to confirm your purchase.
                 </p>
 
