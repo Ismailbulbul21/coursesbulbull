@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { ArrowLeft, Play, Lock, AlertCircle } from 'lucide-react'
+import ProtectedVideo from '../components/ProtectedVideo'
 
 export default function Lesson() {
   const { courseId, lessonId } = useParams()
@@ -25,6 +26,112 @@ export default function Lesson() {
     console.log('Lesson effect triggered - courseId:', courseId, 'lessonId:', lessonId)
     fetchLessonData()
   }, [courseId, lessonId, user])
+
+  // Add screen recording protection
+  useEffect(() => {
+    // Disable right-click context menu globally for this page
+    const handleContextMenu = (e) => {
+      e.preventDefault()
+      return false
+    }
+
+    // Disable common keyboard shortcuts for developer tools and screen recording
+    const handleKeyDown = (e) => {
+      // Disable F12 (Developer Tools)
+      if (e.key === 'F12') {
+        e.preventDefault()
+        return false
+      }
+      
+      // Disable Ctrl+Shift+I (Developer Tools)
+      if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+        e.preventDefault()
+        return false
+      }
+      
+      // Disable Ctrl+Shift+C (Element Inspector)
+      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        e.preventDefault()
+        return false
+      }
+      
+      // Disable Ctrl+U (View Source)
+      if (e.ctrlKey && e.key === 'u') {
+        e.preventDefault()
+        return false
+      }
+      
+      // Disable Ctrl+S (Save Page)
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault()
+        return false
+      }
+      
+      // Disable Print Screen
+      if (e.key === 'PrintScreen') {
+        e.preventDefault()
+        return false
+      }
+    }
+
+    // Add event listeners
+    document.addEventListener('contextmenu', handleContextMenu)
+    document.addEventListener('keydown', handleKeyDown)
+
+    // Cleanup event listeners on component unmount
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
+
+  // Add visibility change detection for screen recording protection
+  useEffect(() => {
+    let videoPausedStatus = true
+    const videoElement = document.querySelector('video')
+
+    const handleVisibilityChange = () => {
+      if (videoElement) {
+        const isHidden = document.hidden
+        if (isHidden) {
+          videoPausedStatus = videoElement.paused
+          if (!videoElement.paused) {
+            videoElement.pause()
+          }
+        } else {
+          if (!videoPausedStatus) {
+            videoElement.play()
+          }
+        }
+      }
+    }
+
+    // Monitor window focus to detect when window is covered by other applications
+    let pageFocus = document.hasFocus()
+    const checkFocus = () => {
+      if (videoElement && document.hasFocus() !== pageFocus) {
+        pageFocus = document.hasFocus()
+        if (!pageFocus) {
+          videoPausedStatus = videoElement.paused
+          if (!videoElement.paused) {
+            videoElement.pause()
+          }
+        } else {
+          if (!videoPausedStatus) {
+            videoElement.play()
+          }
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    const focusInterval = setInterval(checkFocus, 1000)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      clearInterval(focusInterval)
+    }
+  }, [lesson])
 
   const fetchLessonData = async () => {
     try {
@@ -195,12 +302,9 @@ export default function Lesson() {
         {/* Main Video Area */}
         <div className="lg:col-span-3">
           <div className="bg-black rounded-lg overflow-hidden shadow-lg mb-6">
-            <video
+            <ProtectedVideo
               key={lesson.id}
-              controls
-              width="100%"
-              height="auto"
-              className="w-full aspect-video"
+              src={lesson.video_url}
               onError={(e) => {
                 console.error('Video error:', e.target.error)
                 console.error('Error code:', e.target.error?.code)
@@ -210,10 +314,7 @@ export default function Lesson() {
               onLoadedData={() => console.log('Video loaded successfully')}
               onCanPlay={() => console.log('Video can play')}
               preload="auto"
-            >
-              <source src={lesson.video_url} type="video/mp4" />
-              <p>Your browser does not support the video tag. <a href={lesson.video_url} target="_blank" rel="noopener noreferrer">Download the video</a></p>
-            </video>
+            />
           </div>
 
           {/* Navigation */}
