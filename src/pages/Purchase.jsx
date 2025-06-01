@@ -97,6 +97,7 @@ export default function Purchase() {
           user_id: user.id,
           course_id: id,
           phone_number: phoneNumber.trim(),
+          user_email: user.email,
           status: 'pending'
         }])
         .select()
@@ -156,7 +157,7 @@ export default function Purchase() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Course
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Purchase Course</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">iibso coursada</h1>
         <p className="text-gray-600">Complete your purchase to access all course content</p>
       </div>
 
@@ -307,14 +308,13 @@ export default function Purchase() {
                 </div>
                 
                 <p className="text-gray-600 mb-6">
-                  Markaad lacagta soo dirto , Soo qor  numberka aad ka soo dirtay  hoos ku soo qor.
-                  After sending the payment, enter your phone number below to confirm your purchase.
+                  Markaad lacagta soo dirto , Ku Soo qor numberka aad ka soo dirtay lacagta   hoos ku soo qor , si laguu xaqiijiyo.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                      Your Phone Number *
+                     numberkaaga soo qor  *
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -324,12 +324,12 @@ export default function Purchase() {
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         className="input-field pl-10"
-                        placeholder="Enter the phone number you used for payment"
+                        placeholder="Numberka aad lacagta ka soo dirtay ku qor meeshaan "
                         required
                       />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      This should be the same number you used to send the payment
+                      Numberka aad lacagta ka soo dirtay isku mid hanoqdaan 
                     </p>
                   </div>
 
@@ -365,8 +365,7 @@ export default function Purchase() {
 
                 <div className="mt-6 p-4 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-600">
-                    <strong>Note:</strong> Your payment will be reviewed within 24 hours. 
-                    Once approved, you'll have full access to all course materials.
+                    <strong>Note:</strong> Waad mahadsanatahy , Sug inta lagaa soo aqbalaayo , si laguu xaqiijiyo. .
                   </p>
                 </div>
               </div>

@@ -61,7 +61,7 @@ export default function Admin() {
         .select('*')
         .order('created_at', { ascending: false })
 
-      // Fetch payments with course info only (simplified approach)
+      // Fetch payments with course info
       const { data: paymentsData } = await supabase
         .from('payments')
         .select(`
@@ -101,10 +101,25 @@ export default function Admin() {
 
   const handlePaymentAction = async (paymentId, action) => {
     try {
+      let status
+      switch (action) {
+        case 'approve':
+          status = 'approved'
+          break
+        case 'reject':
+          status = 'rejected'
+          break
+        case 'cancel':
+          status = 'cancelled'
+          break
+        default:
+          throw new Error('Invalid action')
+      }
+
       const { error } = await supabase
         .from('payments')
         .update({ 
-          status: action,
+          status,
           reviewed_at: new Date().toISOString(),
           reviewed_by: user.id
         })
@@ -113,21 +128,42 @@ export default function Admin() {
       if (error) throw error
 
       // If approved, create purchase record
-      if (action === 'approved') {
+      if (status === 'approved') {
         const payment = payments.find(p => p.id === paymentId)
         if (payment) {
-          await supabase
+          const { error: purchaseError } = await supabase
             .from('purchases')
-            .insert({
+            .insert([{
               user_id: payment.user_id,
               course_id: payment.course_id
-            })
+            }])
+
+          if (purchaseError) throw purchaseError
         }
       }
 
-      fetchDashboardData()
-    } catch (error) {
-      console.error('Error updating payment:', error)
+      // If cancelled, remove any existing purchase record
+      if (status === 'cancelled') {
+        const payment = payments.find(p => p.id === paymentId)
+        if (payment) {
+          const { error: deleteError } = await supabase
+            .from('purchases')
+            .delete()
+            .eq('user_id', payment.user_id)
+            .eq('course_id', payment.course_id)
+
+          if (deleteError) {
+            console.warn('Could not delete purchase record:', deleteError)
+          }
+        }
+      }
+
+      await fetchDashboardData()
+      alert(`Payment ${action}d successfully!`)
+
+    } catch (err) {
+      console.error(`Error ${action}ing payment:`, err)
+      alert(`Failed to ${action} payment: ${err.message}`)
     }
   }
 
@@ -771,7 +807,7 @@ export default function Admin() {
                         Course
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        User ID
+                        Email
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Phone
@@ -796,7 +832,9 @@ export default function Admin() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{payment.user_id}</div>
+                          <div className="text-sm text-gray-900">
+                            {payment.user_email || 'Email not available'}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">{payment.phone_number}</div>
@@ -808,6 +846,8 @@ export default function Admin() {
                                 ? 'bg-green-100 text-green-800'
                                 : payment.status === 'rejected'
                                 ? 'bg-red-100 text-red-800'
+                                : payment.status === 'cancelled'
+                                ? 'bg-gray-100 text-gray-800'
                                 : 'bg-yellow-100 text-yellow-800'
                             }`}
                           >
@@ -818,22 +858,48 @@ export default function Admin() {
                           {new Date(payment.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {payment.status === 'pending' && (
-                            <div className="flex space-x-2">
+                          <div className="flex space-x-2">
+                            {payment.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => handlePaymentAction(payment.id, 'approve')}
+                                  className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                >
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handlePaymentAction(payment.id, 'reject')}
+                                  className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                >
+                                  <XCircle className="h-3 w-3 mr-1" />
+                                  Reject
+                                </button>
+                              </>
+                            )}
+                            {payment.status === 'approved' && (
                               <button
-                                onClick={() => handlePaymentAction(payment.id, 'approved')}
-                                className="text-green-600 hover:text-green-900"
+                                onClick={() => {
+                                  if (confirm('Are you sure you want to cancel this approved payment? This will revoke the user\'s access to the course.')) {
+                                    handlePaymentAction(payment.id, 'cancel')
+                                  }
+                                }}
+                                className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                               >
-                                <CheckCircle className="h-4 w-4" />
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Cancel
                               </button>
+                            )}
+                            {(payment.status === 'rejected' || payment.status === 'cancelled') && (
                               <button
-                                onClick={() => handlePaymentAction(payment.id, 'rejected')}
-                                className="text-red-600 hover:text-red-900"
+                                onClick={() => handlePaymentAction(payment.id, 'approve')}
+                                className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                               >
-                                <XCircle className="h-4 w-4" />
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Reactivate
                               </button>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
