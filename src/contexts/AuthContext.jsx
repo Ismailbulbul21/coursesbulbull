@@ -93,17 +93,23 @@ export const AuthProvider = ({ children }) => {
   const signOut = async () => {
     try {
       console.log('Attempting to sign out...')
+      
+      // Always clear local state first
+      setUser(null)
+      setIsAdmin(false)
+      
+      // Try to sign out from Supabase
       const { error } = await supabase.auth.signOut()
       
       if (error) {
         console.error('Supabase sign out error:', error)
         
-        // If it's a network error, clear local session anyway
-        if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_INTERNET_DISCONNECTED')) {
-          console.log('Network error detected, clearing local session...')
-          // Force clear local session
-          setUser(null)
-          setIsAdmin(false)
+        // If it's an "Auth session missing" error, that's actually fine - user is already signed out
+        if (error.message?.includes('Auth session missing') || 
+            error.message?.includes('session_not_found') ||
+            error.message?.includes('Failed to fetch') || 
+            error.message?.includes('ERR_INTERNET_DISCONNECTED')) {
+          console.log('Session already cleared or network error, proceeding with local cleanup...')
           // Clear any stored session data
           localStorage.removeItem('supabase.auth.token')
           sessionStorage.clear()
@@ -118,11 +124,16 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Sign out exception:', err)
       
-      // If it's a network error, clear local session anyway
-      if (err.message?.includes('Failed to fetch') || err.message?.includes('ERR_INTERNET_DISCONNECTED')) {
-        console.log('Network exception detected, clearing local session...')
-        setUser(null)
-        setIsAdmin(false)
+      // Always clear local state even if there's an error
+      setUser(null)
+      setIsAdmin(false)
+      
+      // If it's a session missing error or network error, treat as success
+      if (err.message?.includes('Auth session missing') || 
+          err.message?.includes('session_not_found') ||
+          err.message?.includes('Failed to fetch') || 
+          err.message?.includes('ERR_INTERNET_DISCONNECTED')) {
+        console.log('Session error or network exception detected, clearing local session...')
         localStorage.removeItem('supabase.auth.token')
         sessionStorage.clear()
         return { error: null }

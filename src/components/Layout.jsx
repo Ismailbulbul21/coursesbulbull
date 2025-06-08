@@ -13,13 +13,16 @@ export default function Layout({ children }) {
       const { error } = await signOut()
       if (error) {
         console.error('Sign out error:', error)
-        return
+        // Don't return early - still navigate to home since local state is cleared
       }
-      // Only navigate and close menu if sign out was successful
+      // Always navigate and close menu after sign out attempt
       navigate('/')
       setIsMobileMenuOpen(false)
     } catch (err) {
       console.error('Sign out failed:', err)
+      // Still navigate to home since local state should be cleared
+      navigate('/')
+      setIsMobileMenuOpen(false)
     }
   }
 

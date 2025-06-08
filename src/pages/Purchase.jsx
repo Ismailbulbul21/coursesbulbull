@@ -5,12 +5,9 @@ import { supabase } from '../lib/supabase'
 import { 
   ArrowLeft, 
   Phone, 
-  CreditCard, 
-  Shield, 
   CheckCircle,
   AlertCircle,
-  Clock,
-  BookOpen
+  Clock
 } from 'lucide-react'
 
 export default function Purchase() {
@@ -63,7 +60,7 @@ export default function Purchase() {
 
     } catch (error) {
       console.error('Error fetching data:', error)
-      setError('Failed to load course information')
+      setError('Ma suurtagal in la soo raro macluumaadka courseka')
     } finally {
       setLoading(false)
     }
@@ -76,14 +73,14 @@ export default function Purchase() {
 
     // Validation
     if (!phoneNumber.trim()) {
-      setError('Please enter your phone number')
+      setError('Fadlan gali numberkaaga')
       return
     }
 
     // Basic phone validation
     const phoneRegex = /^[+]?[\d\s\-\(\)]{8,}$/
     if (!phoneRegex.test(phoneNumber)) {
-      setError('Please enter a valid phone number')
+      setError('Fadlan gali number sax ah')
       return
     }
 
@@ -105,13 +102,13 @@ export default function Purchase() {
 
       if (error) throw error
 
-      setSuccess('Payment submission successful! Your request has been sent for review.')
+      setSuccess('Lacag bixintaada waa la diray! Waa la eegi doonaa 24 saacadood gudahood.')
       setExistingPayment(data)
       setPhoneNumber('')
 
     } catch (err) {
       console.error('Error submitting payment:', err)
-      setError(err.message || 'Failed to submit payment request')
+      setError('Lacag bixinta ma guulaysan. Fadlan isku day mar kale.')
     } finally {
       setSubmitting(false)
     }
@@ -123,10 +120,10 @@ export default function Purchase() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading course information...</p>
+          <p className="mt-4 text-gray-600">Waa la soo raraya...</p>
         </div>
       </div>
     )
@@ -134,12 +131,12 @@ export default function Purchase() {
 
   if (!course) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-red-600 mb-4">Course Not Found</h1>
-          <p className="text-gray-600 mb-6">The course you're looking for doesn't exist.</p>
+          <h1 className="text-3xl font-bold text-red-600 mb-4">Course ma jiro</h1>
+          <p className="text-gray-600 mb-6">Courseka aad raadinayso ma jiro.</p>
           <Link to="/" className="btn-primary">
-            Back to Home
+            Ku noqo bogga hore
           </Link>
         </div>
       </div>
@@ -147,232 +144,159 @@ export default function Purchase() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <Link
           to={`/course/${id}`}
           className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Course
+          Dib u noqo
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">iibso coursada</h1>
-        <p className="text-gray-600">Complete your purchase to access all course content</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Lacag Bixinta</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Course Summary */}
-        <div className="lg:col-span-1">
-          <div className="card p-6 sticky top-8">
-            <img
-              src={course.thumbnail_url || '/placeholder-course.jpg'}
-              alt={course.title}
-              className="w-full h-48 object-cover rounded-lg mb-4"
-            />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">{course.title}</h3>
-            <p className="text-gray-600 mb-4 line-clamp-3">{course.description}</p>
-            <div className="text-3xl font-bold text-primary-600 mb-4">
-              ${course.price}
+      {existingPayment ? (
+        // Existing Payment Status
+        <div className="card p-6 text-center">
+          <div className="mx-auto w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-4">
+            <Clock className="h-6 w-6 text-yellow-600" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Lacag bixintaada waa la diray</h3>
+          <p className="text-gray-600 mb-4">
+            Lacag bixintaada waa la eegayaa. Waxaad heli doontaa jawaab 24 saacadood gudahood.
+          </p>
+          
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <p className="text-sm text-gray-600 mb-1">Numberkaaga:</p>
+            <p className="font-semibold text-gray-900">{existingPayment.phone_number}</p>
+          </div>
+
+          {existingPayment.status === 'pending' && (
+            <button
+              onClick={fetchCourseAndPaymentStatus}
+              className="btn-secondary text-sm"
+            >
+              Hubi xaaladda
+            </button>
+          )}
+          
+          {existingPayment.status === 'approved' && (
+            <div>
+              <p className="text-green-600 mb-4">
+                ✅ Lacag bixintaada waa la aqbalay! Hadda waxaad geli kartaa courseka.
+              </p>
+              <Link to="/dashboard" className="btn-primary">
+                Aad courseyada
+              </Link>
             </div>
-            <div className="flex items-center text-sm text-gray-500">
-              <BookOpen className="h-4 w-4 mr-1" />
-              <span>Full course access included</span>
+          )}
+          
+          {existingPayment.status === 'rejected' && (
+            <div>
+              <p className="text-red-600 mb-4">
+                ❌ Lacag bixintaada waa la diiday. Fadlan isku day mar kale.
+              </p>
+              <button
+                onClick={() => setExistingPayment(null)}
+                className="btn-primary"
+              >
+                Lacag cusub dir
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        // Payment Form - Simple and Clean
+        <div className="space-y-6">
+          {/* Course Info */}
+          <div className="card p-4">
+            <div className="flex items-center space-x-4">
+              <img
+                src={course.thumbnail_url || '/placeholder-course.jpg'}
+                alt={course.title}
+                className="w-16 h-16 object-cover rounded-lg"
+              />
+              <div>
+                <h3 className="font-semibold text-gray-900">{course.title}</h3>
+                <p className="text-2xl font-bold text-primary-600">${course.price}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Instructions - Simple */}
+          <div className="card p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Sidee lacagta u diraysaa</h3>
+            
+            <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-4">
+              <p className="text-primary-800 mb-3 text-center">
+                Lacagta <strong>${course.price}</strong> numberkaan u dir:
+              </p>
+              <div className="flex items-center justify-center bg-white rounded-lg p-4 border border-primary-300">
+                <Phone className="h-5 w-5 text-primary-600 mr-2" />
+                <span className="text-xl font-bold text-primary-900">+252 61 7211084</span>
+              </div>
+            </div>
+
+            {/* Phone Number Input - Prominent */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                  Numberka aad lacagta ka soo dirtay ku qor:
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="tel"
+                    id="phoneNumber"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="input-field pl-10 text-lg py-3"
+                    placeholder="Tusaale: +252 61 1234567"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm">{error}</span>
+                </div>
+              )}
+
+              {success && (
+                <div className="flex items-center space-x-2 text-green-600 bg-green-50 p-3 rounded-lg">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm">{success}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full btn-primary py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Waa la diraya...
+                  </div>
+                ) : (
+                  'Xaqiiji Lacag Bixinta'
+                )}
+              </button>
+            </form>
+
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-600 text-center">
+                Waad mahadsantahay. Waa la eegi doonaa lacag bixintaada 24 saacadood gudahood.
+              </p>
             </div>
           </div>
         </div>
-
-        {/* Payment Section */}
-        <div className="lg:col-span-2">
-          {existingPayment ? (
-            // Existing Payment Status
-            <div className="card p-6">
-      <div className="text-center">
-                <div className="mx-auto w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mb-4">
-                  <Clock className="h-6 w-6 text-yellow-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Payment Submitted</h3>
-                <p className="text-gray-600 mb-6">
-                  Your payment request has been submitted and is currently under review.
-                </p>
-                
-                <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium text-gray-700">Phone Number:</span>
-                      <p className="text-gray-900">{existingPayment.phone_number}</p>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">Status:</span>
-                      <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                        existingPayment.status === 'approved' 
-                          ? 'bg-green-100 text-green-800'
-                          : existingPayment.status === 'rejected'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {existingPayment.status}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">Submitted:</span>
-                      <p className="text-gray-900">
-                        {new Date(existingPayment.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {existingPayment.status === 'pending' && (
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-500">
-                      We'll review your payment within 24 hours. You'll receive access once approved.
-                    </p>
-                    <button
-                      onClick={fetchCourseAndPaymentStatus}
-                      className="btn-secondary text-sm"
-                    >
-                      Check Status
-                    </button>
-                  </div>
-                )}
-                
-                {existingPayment.status === 'approved' && (
-                  <div>
-                    <p className="text-green-600 mb-4">
-                      ✅ Payment approved! You now have access to this course.
-                    </p>
-                    <Link to="/dashboard" className="btn-primary">
-                      Go to My Courses
-                    </Link>
-                  </div>
-                )}
-                
-                {existingPayment.status === 'rejected' && (
-                  <div>
-                    <p className="text-red-600 mb-4">
-                      ❌ Payment was rejected. Please try again or contact support.
-                    </p>
-                    <button
-                      onClick={() => setExistingPayment(null)}
-                      className="btn-primary"
-                    >
-                      Submit New Payment
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            // Payment Instructions and Form
-            <>
-              {/* Payment Instructions */}
-              <div className="card p-6 mb-6">
-                <div className="flex items-center mb-4">
-                  <CreditCard className="h-5 w-5 text-primary-600 mr-2" />
-                  <h3 className="text-xl font-semibold text-gray-900">LACAG BIXINTA </h3>
-                </div>
-                
-                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-4">
-                  <h4 className="font-semibold text-primary-900 mb-2">Mobile Money Payment</h4>
-                  <p className="text-primary-800 mb-3">
-                    Lacagta numberkaan  exactly <strong>${course.price}</strong> numberkaan ku soo dir :
-                  </p>
-                  <div className="flex items-center justify-center bg-white rounded-lg p-4 border border-primary-300">
-                    <Phone className="h-5 w-5 text-primary-600 mr-2" />
-                    <span className="text-xl font-bold text-primary-900">+252 61 7211084</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 text-sm text-gray-600">
-                  <div className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Qiimha lacagta waa kan : <strong>${course.price}</strong></span>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Use the phone number you'll enter in the form below</span>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span>Keep your transaction receipt for reference</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Form */}
-              <div className="card p-6">
-                <div className="flex items-center mb-4">
-                  <Shield className="h-5 w-5 text-primary-600 mr-2" />
-                  <h3 className="text-xl font-semibold text-gray-900">Confirm Your Payment</h3>
-                </div>
-                
-                <p className="text-gray-600 mb-6">
-                  Markaad lacagta soo dirto , Ku Soo qor numberka aad ka soo dirtay lacagta   hoos ku soo qor , si laguu xaqiijiyo.
-                </p>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                     numberkaaga soo qor  *
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <input
-                        type="tel"
-                        id="phoneNumber"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        className="input-field pl-10"
-                        placeholder="Numberka aad lacagta ka soo dirtay ku qor meeshaan "
-                        required
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Numberka aad lacagta ka soo dirtay isku mid hanoqdaan 
-                    </p>
-                  </div>
-
-                  {error && (
-                    <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-sm">{error}</span>
-                    </div>
-                  )}
-
-                  {success && (
-                    <div className="flex items-center space-x-2 text-green-600 bg-green-50 p-3 rounded-lg">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm">{success}</span>
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full btn-primary py-3 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {submitting ? (
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Submitting...
-                      </div>
-                    ) : (
-                      'Confirm Payment'
-                    )}
-                  </button>
-                </form>
-
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-600">
-                    <strong>Note:</strong> Waad mahadsanatahy , Sug inta lagaa soo aqbalaayo , si laguu xaqiijiyo. .
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   )
 } 
