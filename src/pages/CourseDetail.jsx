@@ -149,16 +149,12 @@ export default function CourseDetail() {
                 <span>{lessons.length} lessons</span>
               </div>
               <div className="flex items-center space-x-1">
-                <Clock className="h-4 w-4" />
-                <span>~{Math.round(lessons.length * 15)} minutes</span>
-              </div>
-              <div className="flex items-center space-x-1">
                 <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                <span>4.8 (234 reviews)</span>
+                <span>4.8</span>
               </div>
               <div className="flex items-center space-x-1">
                 <Users className="h-4 w-4" />
-                <span>1,234 students</span>
+                <span>50 students</span>
               </div>
             </div>
             
@@ -185,7 +181,6 @@ export default function CourseDetail() {
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">{lesson.title}</h3>
-                      <p className="text-sm text-gray-500">~15 minutes</p>
                     </div>
                   </div>
                   
@@ -240,12 +235,8 @@ export default function CourseDetail() {
                   className="w-full btn-primary flex items-center justify-center space-x-2"
                 >
                   <ShoppingCart className="h-4 w-4" />
-                  <span>Purchase Course</span>
+                  <span>iibso/gado</span>
                 </button>
-                
-                <div className="text-center text-sm text-gray-600">
-                  <p>30-day money-back guarantee</p>
-                </div>
               </div>
             )}
 
