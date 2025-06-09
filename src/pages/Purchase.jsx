@@ -235,15 +235,15 @@ export default function Purchase() {
               </p>
               <div className="flex items-center justify-center bg-white rounded-lg p-4 border border-primary-300">
                 <Phone className="h-5 w-5 text-primary-600 mr-2" />
-                <span className="text-xl font-bold text-primary-900">+252 61 7211084</span>
+                <span className="text-xl font-bold text-primary-900">+ 061 7211084</span>
               </div>
             </div>
 
             {/* Phone Number Input - Prominent */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                  Numberka aad lacagta ka soo dirtay ku qor:
+                <label htmlFor="numberkaaga" className="block text-md font-medium text-gray-700 mb-2">
+                  Numberkaaga aad lacagta ka soo dirtay meeshaan ku qor :
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />

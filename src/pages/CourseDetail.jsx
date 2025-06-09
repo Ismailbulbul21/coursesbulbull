@@ -163,6 +163,45 @@ export default function CourseDetail() {
             </p>
           </div>
 
+          {/* Mobile Purchase Button - Only visible on mobile */}
+          <div className="lg:hidden mb-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-bold text-primary-600">
+                    ${course.price}
+                  </div>
+                  <p className="text-sm text-gray-600">One-time payment</p>
+                </div>
+                
+                <div className="flex-shrink-0">
+                  {hasPurchased ? (
+                    <Link
+                      to="/dashboard"
+                      className="btn-primary px-6 py-3"
+                    >
+                      My Courses
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={handlePurchaseClick}
+                      className="btn-primary flex items-center space-x-2 px-6 py-3"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>iibso/gado</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              {hasPurchased && (
+                <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                  <p className="text-green-800 font-medium text-sm">✓ You own this course</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Course Content */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Course Content</h2>
@@ -206,8 +245,8 @@ export default function CourseDetail() {
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="lg:col-span-1">
+        {/* Desktop Sidebar - Hidden on mobile */}
+        <div className="lg:col-span-1 hidden lg:block">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
             <div className="text-center mb-6">
               <div className="text-3xl font-bold text-primary-600 mb-2">
