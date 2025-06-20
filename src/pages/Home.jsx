@@ -136,9 +136,15 @@ export default function Home() {
                     </div>
                     
                     <div className="text-right">
-                      <span className="text-2xl font-bold text-primary-600">
-                        ${course.price}
-                      </span>
+                      {course.is_free ? (
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-sm font-bold rounded-full">
+                          FREE
+                        </span>
+                      ) : (
+                        <span className="text-2xl font-bold text-primary-600">
+                          ${course.price}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

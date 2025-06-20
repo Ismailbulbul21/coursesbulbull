@@ -54,6 +54,14 @@ export default function CourseDetail() {
     if (!user) return
 
     try {
+      // First check if course is free
+      if (course && course.is_free) {
+        // Auto-enroll user in free course
+        await autoEnrollInFreeCourse()
+        setHasPurchased(true)
+        return
+      }
+
       // Check if user has a record in purchases table
       const { data: purchaseData } = await supabase
         .from('purchases')
@@ -85,6 +93,35 @@ export default function CourseDetail() {
     } catch (err) {
       // User hasn't purchased the course
       setHasPurchased(false)
+    }
+  }
+
+  const autoEnrollInFreeCourse = async () => {
+    try {
+      // Check if user is already enrolled
+      const { data: existingPurchase } = await supabase
+        .from('purchases')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('course_id', id)
+        .single()
+
+      if (!existingPurchase) {
+        // Auto-enroll user in free course
+        const { error } = await supabase
+          .from('purchases')
+          .insert([{
+            user_id: user.id,
+            course_id: id
+          }])
+
+        if (error) {
+          console.error('Error auto-enrolling in free course:', error)
+        }
+      }
+    } catch (err) {
+      // Enrollment might fail, but we still allow access to free courses
+      console.error('Error checking/creating free course enrollment:', err)
     }
   }
 
@@ -168,10 +205,21 @@ export default function CourseDetail() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-primary-600">
-                    ${course.price}
-                  </div>
-                  <p className="text-sm text-gray-600">One-time payment</p>
+                  {course.is_free ? (
+                    <div>
+                      <div className="px-3 py-1 bg-green-100 text-green-800 text-lg font-bold rounded-full inline-block">
+                        FREE
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">No payment required</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="text-2xl font-bold text-primary-600">
+                        ${course.price}
+                      </div>
+                      <p className="text-sm text-gray-600">One-time payment</p>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex-shrink-0">
@@ -182,6 +230,20 @@ export default function CourseDetail() {
                     >
                       My Courses
                     </Link>
+                  ) : course.is_free ? (
+                    <button
+                      onClick={() => {
+                        if (user) {
+                          checkPurchaseStatus()
+                        } else {
+                          navigate('/auth')
+                        }
+                      }}
+                      className="btn-primary flex items-center space-x-2 px-6 py-3"
+                    >
+                      <Play className="h-4 w-4" />
+                      <span>Start Learning</span>
+                    </button>
                   ) : (
                     <button
                       onClick={handlePurchaseClick}
@@ -249,10 +311,21 @@ export default function CourseDetail() {
         <div className="lg:col-span-1 hidden lg:block">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
             <div className="text-center mb-6">
-              <div className="text-3xl font-bold text-primary-600 mb-2">
-                ${course.price}
-              </div>
-              <p className="text-gray-600">One-time payment</p>
+              {course.is_free ? (
+                <div>
+                  <div className="px-4 py-2 bg-green-100 text-green-800 text-2xl font-bold rounded-full inline-block mb-2">
+                    FREE
+                  </div>
+                  <p className="text-gray-600">No payment required</p>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-3xl font-bold text-primary-600 mb-2">
+                    ${course.price}
+                  </div>
+                  <p className="text-gray-600">One-time payment</p>
+                </div>
+              )}
             </div>
 
             {hasPurchased ? (
@@ -266,6 +339,22 @@ export default function CourseDetail() {
                 >
                   Go to My Courses
                 </Link>
+              </div>
+            ) : course.is_free ? (
+              <div className="space-y-4">
+                <button
+                  onClick={() => {
+                    if (user) {
+                      checkPurchaseStatus()
+                    } else {
+                      navigate('/auth')
+                    }
+                  }}
+                  className="w-full btn-primary flex items-center justify-center space-x-2"
+                >
+                  <Play className="h-4 w-4" />
+                  <span>Start Learning</span>
+                </button>
               </div>
             ) : (
               <div className="space-y-4">

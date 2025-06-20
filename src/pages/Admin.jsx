@@ -498,8 +498,12 @@ export default function Admin() {
       return
     }
     
-    if (!editingCourse.price || parseFloat(editingCourse.price) <= 0) {
-      alert('Course price must be greater than 0')
+    if (!editingCourse.is_free && (!editingCourse.price || parseFloat(editingCourse.price) <= 0)) {
+      alert('Course price must be greater than 0 for paid courses')
+      return
+    }
+    if (editingCourse.is_free && editingCourse.price && parseFloat(editingCourse.price) > 0) {
+      alert('Free courses should have price set to 0')
       return
     }
 
@@ -527,7 +531,8 @@ export default function Admin() {
         .update({
           title: editingCourse.title,
           description: editingCourse.description,
-          price: parseFloat(editingCourse.price),
+          price: editingCourse.is_free ? 0 : parseFloat(editingCourse.price),
+          is_free: editingCourse.is_free,
           thumbnail_url: thumbnailUrl || null
         })
         .eq('id', editingCourse.id)
@@ -735,7 +740,15 @@ export default function Admin() {
                     <h3 className="text-lg font-medium text-gray-900 mb-2">{course.title}</h3>
                     <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-2xl font-bold text-primary-600">${course.price}</span>
+                      <div className="flex items-center space-x-2">
+                        {course.is_free ? (
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                            FREE
+                          </span>
+                        ) : (
+                          <span className="text-2xl font-bold text-primary-600">${course.price}</span>
+                        )}
+                      </div>
                       <span className="text-sm text-gray-500">
                         {new Date(course.created_at).toLocaleDateString()}
                       </span>
@@ -1301,10 +1314,35 @@ export default function Admin() {
                     type="number"
                     value={editingCourse.price}
                     onChange={(e) => handleCourseChange('price', e.target.value)}
-                    className="input-field"
-                    placeholder="Enter course price"
-                    required
+                    disabled={editingCourse.is_free}
+                    className={`input-field ${editingCourse.is_free ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    placeholder={editingCourse.is_free ? "0.00 (Free Course)" : "Enter course price"}
+                    required={!editingCourse.is_free}
                   />
+                </div>
+                
+                {/* Free Course Toggle */}
+                <div>
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editingCourse.is_free || false}
+                      onChange={(e) => {
+                        const isFree = e.target.checked
+                        handleCourseChange('is_free', isFree)
+                        if (isFree) {
+                          handleCourseChange('price', '0')
+                        }
+                      }}
+                      className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      Make this course free
+                    </span>
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Free courses will be automatically accessible to all users without payment
+                  </p>
                 </div>
 
                 {/* Thumbnail Upload */}

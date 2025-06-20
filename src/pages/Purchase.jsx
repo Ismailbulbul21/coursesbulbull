@@ -44,6 +44,12 @@ export default function Purchase() {
       if (courseError) throw courseError
       setCourse(courseData)
 
+      // If course is free, redirect to course page
+      if (courseData.is_free) {
+        navigate(`/course/${id}`)
+        return
+      }
+
       // Check if user already has a payment for this course
       const { data: paymentData } = await supabase
         .from('payments')

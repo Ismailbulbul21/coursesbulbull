@@ -32,6 +32,7 @@ export default function AdminUpload() {
     title: '',
     description: '',
     price: '',
+    is_free: false,
     thumbnail_url: '',
     thumbnail_file: null
   })
@@ -154,8 +155,12 @@ export default function AdminUpload() {
       setError('Course description is required')
       return false
     }
-    if (!courseData.price || parseFloat(courseData.price) <= 0) {
-      setError('Course price must be greater than 0')
+    if (!courseData.is_free && (!courseData.price || parseFloat(courseData.price) <= 0)) {
+      setError('Course price must be greater than 0 for paid courses')
+      return false
+    }
+    if (courseData.is_free && courseData.price && parseFloat(courseData.price) > 0) {
+      setError('Free courses should have price set to 0')
       return false
     }
     
@@ -221,7 +226,8 @@ export default function AdminUpload() {
         .insert([{
           title: courseData.title,
           description: courseData.description,
-          price: parseFloat(courseData.price),
+          price: courseData.is_free ? 0 : parseFloat(courseData.price),
+          is_free: courseData.is_free,
           thumbnail_url: thumbnailUrl || null
         }])
         .select()
@@ -289,6 +295,7 @@ export default function AdminUpload() {
         title: '',
         description: '',
         price: '',
+        is_free: false,
         thumbnail_url: '',
         thumbnail_file: null
       })
@@ -404,11 +411,37 @@ export default function AdminUpload() {
                   min="0"
                   value={courseData.price}
                   onChange={handleCourseChange}
-                  className="input-field pl-10"
-                  placeholder="0.00"
-                  required
+                  disabled={courseData.is_free}
+                  className={`input-field pl-10 ${courseData.is_free ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  placeholder={courseData.is_free ? "0.00 (Free Course)" : "0.00"}
+                  required={!courseData.is_free}
                 />
               </div>
+            </div>
+            
+            <div>
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="is_free"
+                  checked={courseData.is_free}
+                  onChange={(e) => {
+                    const isFree = e.target.checked
+                    setCourseData(prev => ({
+                      ...prev,
+                      is_free: isFree,
+                      price: isFree ? '0' : prev.price
+                    }))
+                  }}
+                  className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Make this course free
+                </span>
+              </label>
+              <p className="text-xs text-gray-500 mt-1">
+                Free courses will be automatically accessible to all users without payment
+              </p>
             </div>
             
             {/* Thumbnail Upload Section */}
